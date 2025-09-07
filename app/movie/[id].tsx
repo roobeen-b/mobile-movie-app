@@ -1,12 +1,12 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-const index = () => {
+const MovieDetailScreen = () => {
   return (
     <View>
-      <Text>index</Text>
+      <Text>MovieDetailScreen</Text>
     </View>
   );
 };
 
-export default index;
+export default MovieDetailScreen;
