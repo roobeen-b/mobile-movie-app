@@ -7,7 +7,11 @@ export const TMDB_CONFIG = {
   },
 };
 
-export const fetchMovies = async ({ query }: { query: string }) => {
+export const fetchMovies = async ({
+  query,
+}: {
+  query: string;
+}): Promise<Movie[]> => {
   const endpoint =
     query.length > 0
       ? `/search/movie?query=${encodeURIComponent(query)}`
@@ -21,5 +25,5 @@ export const fetchMovies = async ({ query }: { query: string }) => {
     throw new Error("Failed to fetch movies", response.statusText);
   }
   const data = await response.json();
-  return data;
+  return data.results;
 };
