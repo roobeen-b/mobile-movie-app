@@ -51,3 +51,18 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
     throw error;
   }
 };
+
+export const getTrendingMovies = async (): Promise<TrendingMovie[]> => {
+  try {
+    const { data } = await supabase
+      .from("metrics")
+      .select("*")
+      .limit(5)
+      .order("count", { ascending: false });
+
+    return data as TrendingMovie[];
+  } catch (error) {
+    console.error("Error fetching trending movies:", error);
+    throw error;
+  }
+};
