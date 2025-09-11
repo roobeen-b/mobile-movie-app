@@ -1,6 +1,5 @@
-import { icons } from "@/constants/icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -11,54 +10,55 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
+
+import { icons } from "@/constants/icons";
 import { supabase } from "../../services/supabase";
 
 const AccountSettings = () => {
   const router = useRouter();
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  // const { user } = useAuth();
+  // const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  useEffect(() => {
-    if (user) {
-      setEmail(user.email || "");
-      setLoading(false);
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user) {
+  //     setEmail(user.email || "");
+  //     setLoading(false);
+  //   }
+  // }, [user]);
 
-  const handleUpdateEmail = async () => {
-    if (!user) return;
+  // const handleUpdateEmail = async () => {
+  //   if (!user) return;
 
-    try {
-      setUpdating(true);
-      const { error } = await supabase.auth.updateUser({ email });
+  //   try {
+  //     setUpdating(true);
+  //     const { error } = await supabase.auth.updateUser({ email });
 
-      if (error) throw error;
+  //     if (error) throw error;
 
-      Alert.alert(
-        "Email Update Sent",
-        "Please check your new email to confirm the update. You will be signed out.",
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              supabase.auth.signOut();
-              router.replace("/profile");
-            },
-          },
-        ]
-      );
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to update email");
-    } finally {
-      setUpdating(false);
-    }
-  };
+  //     Alert.alert(
+  //       "Email Update Sent",
+  //       "Please check your new email to confirm the update. You will be signed out.",
+  //       [
+  //         {
+  //           text: "OK",
+  //           onPress: () => {
+  //             supabase.auth.signOut();
+  //             router.replace("/profile");
+  //           },
+  //         },
+  //       ]
+  //     );
+  //   } catch (error: any) {
+  //     Alert.alert("Error", error.message || "Failed to update email");
+  //   } finally {
+  //     setUpdating(false);
+  //   }
+  // };
 
   const handleUpdatePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -85,13 +85,13 @@ const AccountSettings = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-primary">
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View className="flex-1 justify-center items-center bg-primary">
+  //       <ActivityIndicator size="large" color="#ffffff" />
+  //     </View>
+  //   );
+  // }
 
   return (
     <View className="flex-1 bg-primary p-5">
@@ -101,7 +101,7 @@ const AccountSettings = () => {
         </Text>
 
         {/* Email Section */}
-        <View className="mb-8">
+        {/* <View className="mb-8">
           <Text className="text-white text-lg font-semibold mb-4">
             Email Address
           </Text>
@@ -129,7 +129,7 @@ const AccountSettings = () => {
               )}
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
         {/* Password Section */}
         <View className="mb-8">
