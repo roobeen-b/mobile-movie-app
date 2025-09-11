@@ -1,5 +1,12 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Image, Text, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  RefreshControl,
+  Text,
+  View,
+} from "react-native";
 
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
@@ -12,6 +19,7 @@ import { updateSearchCount } from "@/services/supabase";
 import useFetch from "@/services/useFetch";
 
 const Search = () => {
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const {
@@ -46,6 +54,12 @@ const Search = () => {
     }
   }, [movies]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadMovies();
+    setRefreshing(false);
+  }, [loadMovies]);
+
   return (
     <View className="flex-1 bg-primary">
       <Image
@@ -66,6 +80,15 @@ const Search = () => {
           marginVertical: 16,
         }}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="white"
+            colors={["#9Bd35A", "#689F38"]}
+            progressBackgroundColor="#ffffff"
+          />
+        }
         ListHeaderComponent={
           <>
             <View className="w-full flex-row justify-center mt-20 items-center">

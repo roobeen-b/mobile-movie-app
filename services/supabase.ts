@@ -1,13 +1,20 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import "react-native-url-polyfill/auto";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage, // Use AsyncStorage for session persistence
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false, // Important for React Native
+  },
+});
 
 export const updateSearchCount = async (query: string, movie: Movie) => {
-  console.log("Updating search count for:", query);
   try {
     // First, check if the search term already exists
     const { data } = await supabase
@@ -17,14 +24,12 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
       .single();
 
     if (data) {
-      console.log("inside if");
       // Update existing record
       await supabase
         .from("metrics")
         .update({ count: (data.count || 0) + 1 })
         .eq("id", data.id);
     } else {
-      console.log("inside else");
       // Insert new record
       const insertData = {
         search_term: query,
@@ -33,8 +38,6 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
         poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
         title: movie.title,
       };
-
-      console.log("Inserting data:", insertData); // Debug log
 
       const { error } = await supabase
         .from("metrics")
@@ -63,6 +66,35 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[]> => {
     return data as TrendingMovie[];
   } catch (error) {
     console.error("Error fetching trending movies:", error);
+    throw error;
+  }
+};
+
+export const getLoggedInUserDetails = async (userId: string) => {
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    throw error;
+  }
+};
+
+export const updateProfileData = async (data: ProfileData) => {
+  try {
+    const { error } = await supabase.from("profiles").upsert(data);
+
+    if (error) {
+      console.error("Error updating profile data:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error updating profile data:", error);
     throw error;
   }
 };

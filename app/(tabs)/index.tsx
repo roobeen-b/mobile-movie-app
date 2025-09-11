@@ -7,11 +7,12 @@ import { fetchMovies } from "@/services/api";
 import { getTrendingMovies } from "@/services/supabase";
 import useFetch from "@/services/useFetch";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -19,18 +20,27 @@ import {
 
 const Index = () => {
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
 
   const {
     data: trendingMovies,
     error: trendingMoviesError,
+    reFetch: loadTrendingMovies,
     loading: trendingMoviesLoading,
   } = useFetch(getTrendingMovies);
 
   const {
     data: movies,
     error: moviesError,
+    reFetch: loadMovies,
     loading: moviesLoading,
   } = useFetch(() => fetchMovies({ query: "" }));
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([loadMovies(), loadTrendingMovies()]);
+    setRefreshing(false);
+  }, [loadMovies, loadTrendingMovies]);
 
   return (
     <View className="flex-1 bg-primary">
@@ -43,6 +53,15 @@ const Index = () => {
         className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 10, minHeight: "100%" }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="white"
+            colors={["#9Bd35A", "#689F38"]}
+            progressBackgroundColor="#ffffff"
+          />
+        }
       >
         <Image source={icons.logo} className="w-12 h-12 mx-auto mt-20 mb-5" />
 
