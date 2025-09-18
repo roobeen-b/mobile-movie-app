@@ -15,6 +15,13 @@ interface Movie {
   vote_count: number;
 }
 
+interface SavedMovie {
+  user_id: string;
+  movie_id: number;
+  poster_url: string;
+  title: string;
+}
+
 interface TrendingMovie {
   searchTerm: string;
   movie_id: number;

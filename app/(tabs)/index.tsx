@@ -34,7 +34,7 @@ const Index = () => {
     error: moviesError,
     reFetch: loadMovies,
     loading: moviesLoading,
-  } = useFetch(() => fetchMovies({ query: "" }));
+  } = useFetch(useCallback(() => fetchMovies({ query: "" }), []));
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

@@ -10,9 +10,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { icons } from "@/constants/icons";
+import { useAuth } from "@/contexts/AuthContext";
 import { fetchMovieDetails } from "@/services/api";
+import SavedService from "@/services/savedService";
 import useFetch from "@/services/useFetch";
-
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useCallback, useState } from "react";
 interface MovieInfoProps {
   label: string;
   value?: string | number | null;
@@ -29,11 +32,43 @@ const MovieInfo = ({ label, value }: MovieInfoProps) => (
 
 const Details = () => {
   const router = useRouter();
+  const { user } = useAuth();
   const { id } = useLocalSearchParams();
 
-  const { data: movie, loading } = useFetch(() =>
-    fetchMovieDetails(id as string)
+  const { data: movie, loading } = useFetch(
+    useCallback(() => fetchMovieDetails(id as string), [])
   );
+
+  const [isSaving, setIsSaving] = useState(false);
+  const { data: isSaved, reFetch: refetchSavedStatus } = useFetch<boolean>(
+    useCallback(
+      () => SavedService.checkMovieSaved(user?.id || "", Number(id) || 0),
+      [user?.id, id]
+    ),
+    !!user?.id
+  );
+
+  const handleSaveMovie = async () => {
+    if (!user?.id) {
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const savedMovie = {
+        user_id: user.id,
+        movie_id: movie?.id || 0,
+        poster_url: movie?.poster_path || "",
+        title: movie?.title || "",
+      };
+
+      await SavedService.updateSavedMovie(savedMovie, user.id);
+      await refetchSavedStatus();
+    } catch (error) {
+      console.error("Error saving movie:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (loading)
     return (
@@ -61,6 +96,21 @@ const Details = () => {
               resizeMode="stretch"
             />
           </TouchableOpacity>
+          {user?.id && (
+            <TouchableOpacity
+              onPress={handleSaveMovie}
+              disabled={isSaving}
+              className="absolute bottom-5 right-20 rounded-full size-14 bg-yellow-500 flex items-center justify-center"
+            >
+              {isSaving ? (
+                <ActivityIndicator color="black" />
+              ) : isSaved ? (
+                <FontAwesome name="bookmark" size={24} color="black" />
+              ) : (
+                <FontAwesome name="bookmark-o" size={24} color="black" />
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
         <View className="flex-col items-start justify-center mt-5 px-5">
